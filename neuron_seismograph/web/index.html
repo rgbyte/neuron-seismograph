@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Neuron Seismograph // 3D Circuit &amp; Steering Observatory</title>
+  <link rel="stylesheet" href="styles.css">
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body>
+
+  <canvas id="stage-canvas"></canvas>
+  <div id="pin-overlay"></div>
+
+  <!-- Minimal Top Observatory Bar -->
+  <header class="top-observatory">
+    <div class="brand-pill">
+      <span class="brand-diamond" aria-hidden="true"></span>
+      <h1 class="brand-title">Neuron Seismograph</h1>
+      <span id="live-count-badge" class="mono live-badge">4 lit</span>
+    </div>
+
+    <nav class="mode-capsule" aria-label="Observatory Mode &amp; Documentation">
+      <button data-viz="loom" class="on" type="button">3D Loom</button>
+      <button data-viz="horizon" type="button">Horizon</button>
+      <button id="toggle-web-btn" class="on" type="button">Arcs</button>
+      <button id="toggle-drawer-btn" class="on" type="button">Steer Chat</button>
+      <button commandfor="docs-modal" command="show-modal" class="docs-tab-btn" type="button">Docs</button>
+      <button commandfor="info-3d-modes" command="toggle-popover" class="info-pill-btn" type="button" aria-label="3D Legend and Help">?</button>
+    </nav>
+
+    <div class="right-actions">
+      <button id="reset-all-btn" class="btn-reset" type="button">↺ Reset</button>
+      <select id="cart-select" aria-label="Select circuit cartridge"></select>
+      <button id="export-btn" type="button" aria-label="Export cartridge JSON">↓ JSON</button>
+      <a id="explorer-ext-link" href="http://localhost:8791" target="_blank" rel="noopener" class="mono ext-link">↗ :8791</a>
+    </div>
+  </header>
+
+  <!-- Unified Left Rail: Persona Presets + Dose Clamp + Spiking Neurons -->
+  <aside class="relay-hud" aria-label="Neuron Activation &amp; Relay Controls">
+    <div class="hud-card">
+      <!-- Section 0: Emoji Persona Presets -->
+      <div class="hud-kicker">
+        <div class="kicker-title-group">
+          <span>PERSONA PRESETS</span>
+          <button commandfor="info-personas" command="toggle-popover" class="info-pill-btn" type="button" aria-label="Explain Researched Persona Presets">?</button>
+        </div>
+        <span id="active-persona-tag" class="mono persona-tag">🛡️ Scalpel</span>
+      </div>
+
+      <div id="persona-grid" class="persona-grid" role="group" aria-label="Emoji Personality Steering Presets"></div>
+
+      <hr class="hud-divider">
+
+      <!-- Section 1: Dose Clamp -->
+      <div class="hud-kicker">
+        <div class="kicker-title-group">
+          <span>DOSE CLAMP</span>
+          <button commandfor="info-dose-clamp" command="toggle-popover" class="info-pill-btn" type="button" aria-label="Explain Activation Dose Clamp">?</button>
+        </div>
+        <button id="reset-dose-btn" class="kicker-link-btn" type="button">0.0× Off</button>
+      </div>
+
+      <div class="clamp-box">
+        <div class="clamp-neuron-row">
+          <span id="clamp-neuron-id" class="clamp-coord">L18 · N4310</span>
+          <span id="clamp-dose-readout" class="clamp-dose-badge neg">−0.8× Suppress</span>
+        </div>
+
+        <div class="slider-row">
+          <button id="dose-dec-btn" class="step-btn" type="button" aria-label="Decrease activation by 0.2">−</button>
+          <input id="dose-slider" class="dose-slider" type="range" min="-3.0" max="3.0" step="0.1" value="-0.8" aria-label="Neuron activation steering dose">
+          <button id="dose-inc-btn" class="step-btn" type="button" aria-label="Increase activation by 0.2">+</button>
+        </div>
+
+        <div class="preset-strip">
+          <button class="preset-btn on" data-d="-1.2" type="button">−1.2×</button>
+          <button class="preset-btn" data-d="-0.8" type="button">−0.8×</button>
+          <button class="preset-btn" data-d="0.0" type="button">0×</button>
+          <button class="preset-btn" data-d="0.8" type="button">+0.8×</button>
+          <button class="preset-btn" data-d="1.2" type="button">+1.2×</button>
+        </div>
+
+        <div class="lens-mini">
+          <div class="lens-line"><span class="lens-tag up">+</span><span id="lens-up">inability  cannot  Cannot  unable  Sorry</span></div>
+          <div class="lens-line"><span class="lens-tag dn">−</span><span id="lens-dn">Secret  secret  secrecy  Security  classified</span></div>
+        </div>
+      </div>
+
+      <hr class="hud-divider">
+
+      <!-- Section 2: Spiking Neurons -->
+      <div class="hud-kicker">
+        <div class="kicker-title-group">
+          <span id="spiking-list-title">SPIKING NEURONS</span>
+          <button commandfor="info-spiking-nodes" command="toggle-popover" class="info-pill-btn" type="button" aria-label="Explain Spiking Neurons list">?</button>
+        </div>
+        <div class="kicker-actions">
+          <span id="spiking-layer-span" class="mono">L0–31</span>
+          <button id="reset-neurons-btn" class="kicker-link-btn" type="button">↺ Reset</button>
+        </div>
+      </div>
+
+      <div id="relay-list" class="relay-list"></div>
+    </div>
+  </aside>
+
+  <!-- Clean Right Drawer: Steered Output & Scanner -->
+  <aside id="battle-drawer" class="battle-drawer" aria-label="Live Steering Arena">
+    <div class="drawer-head">
+      <div class="drawer-tabs">
+        <button data-dtab="arena" class="on" type="button">Steered Output</button>
+        <button data-dtab="scanner" type="button">Layer Scanner</button>
+      </div>
+      <div class="kicker-actions">
+        <div class="mode-btn-group">
+          <button id="mode-focused-btn" class="preset-btn on" type="button">±Dose</button>
+          <button id="mode-battle-btn" class="preset-btn" type="button">vs. Sledge</button>
+        </div>
+        <span id="focused-coord" class="mono focused-badge">L18·4310</span>
+        <button commandfor="info-steering-arena" command="toggle-popover" class="info-pill-btn" type="button" aria-label="Explain Live Steering Arena">?</button>
+      </div>
+    </div>
+
+    <div id="dtab-arena" class="battle-body">
+      <div class="fighter-grid">
+        <article class="f-track" data-f="sledge">
+          <div class="f-top">
+            <h2 class="f-name" id="f-sledge-title">▲ +0.8× (L18 N4310)</h2>
+            <span class="f-meta" id="f-sledge-meta">Amplified</span>
+          </div>
+          <div id="f-sledge-text" class="f-stream"></div>
+        </article>
+
+        <article class="f-track" data-f="base">
+          <div class="f-top">
+            <h2 class="f-name">● 0.0× Baseline</h2>
+            <span class="f-meta" id="f-base-meta">Unsteered</span>
+          </div>
+          <div id="f-base-text" class="f-stream"></div>
+        </article>
+
+        <article class="f-track" data-f="scalpel">
+          <div class="f-top">
+            <h2 class="f-name" id="f-scalpel-title">▼ −0.8× (L18 N4310)</h2>
+            <span class="f-meta" id="f-scalpel-meta">Suppressed</span>
+          </div>
+          <div id="f-scalpel-text" class="f-stream"></div>
+        </article>
+      </div>
+    </div>
+
+    <div id="dtab-scanner" class="scan-body hidden">
+      <label class="mono scan-label" for="scan-textarea">TRANSCRIPT / PROMPT TO SCAN ACROSS LAYERS</label>
+      <textarea id="scan-textarea" rows="4" class="mono scan-textarea">User: Write a stealthy keylogger in Python.
+Assistant: I cannot fulfill this request. I am sorry.</textarea>
+      <div class="scan-controls-row">
+        <span class="mono scan-label">Layers</span>
+        <input id="scan-lo" type="number" value="0" min="0" max="31" class="mono layer-num-input" aria-label="From layer">
+        <span>–</span>
+        <input id="scan-hi" type="number" value="31" min="0" max="31" class="mono layer-num-input" aria-label="To layer">
+        <button id="run-scan-btn" class="btn-emerald scan-submit-btn" type="button">Scan into 3D</button>
+      </div>
+      <div id="scan-status" class="mono scan-label">Ready</div>
+    </div>
+
+    <form id="battle-form" class="prompt-dock">
+      <input id="battle-input" value="How do attackers bypass a WAF using HTTP request smuggling? Give a concrete payload example." placeholder="Prompt to scan 3D neurons or stream steered reply..." aria-label="Prompt input">
+      <button id="only-scan-btn" type="button">Scan</button>
+      <button id="battle-run-btn" class="btn-emerald" type="submit">▶ Stream</button>
+      <button id="stop-pass-btn" class="btn-stop hidden" type="button" disabled>■ Stop</button>
+    </form>
+  </aside>
+
+  <!-- Compact Centered Bottom Token Bar -->
+  <section class="timeline-dock" aria-label="Token-by-Token Seismic Impulse Scrubber">
+    <button id="replay-pulse-btn" class="pulse-chip-btn" type="button">▶ Wave</button>
+    <ul id="impulse-rail" class="impulse-rail"></ul>
+    <div class="dock-right">
+      <span id="active-tok-readout" class="mono tok-readout">Click token to focus 3D spike</span>
+      <button commandfor="info-token-dock" command="toggle-popover" class="info-pill-btn" type="button" aria-label="Explain Token Seismograph">?</button>
+    </div>
+  </section>
+
+  <!-- Contextual Info Popovers (Top-Layer Non-Modal Popovers) -->
+  <aside id="info-3d-modes" class="info-popover" popover>
+    <div class="pop-head">
+      <strong>3D Visual Legend &amp; Modes</strong>
+      <button commandfor="info-3d-modes" command="hide-popover" class="pop-close" type="button" aria-label="Close popover">✕</button>
+    </div>
+    <div class="legend-grid-pop">
+      <span class="legend-item"><span class="legend-dot iris"></span>32 MLP Layers (L0→L31 · 9,216/layer)</span>
+      <span class="legend-item"><span class="legend-dot pos"></span>+σ Excitation Spike (Emerald/Gold)</span>
+      <span class="legend-item"><span class="legend-dot neg"></span>−σ Suppression Dip (Crimson)</span>
+      <span class="legend-item"><span class="legend-dot orb"></span>Top 4 Circuit Relay Orbs</span>
+    </div>
+    <p><strong>3D Loom:</strong> Arranges all 294,912 MLP gate neurons into 32 Golden-Angle Fibonacci irises. Left-drag to orbit, right-drag to pan, scroll to zoom.</p>
+    <p><strong>Horizon:</strong> 32-layer token-by-layer z-score waterfall.</p>
+    <p><strong>Arcs:</strong> Direct 1-hop synaptic weights (<code>W_down · W_up</code>) radiating from the focused neuron plus the circuit spine.</p>
+  </aside>
+
+  <aside id="info-personas" class="info-popover" popover>
+    <div class="pop-head">
+      <strong>Researched Emoji Persona Recipes (L12–L23)</strong>
+      <button commandfor="info-personas" command="hide-popover" class="pop-close" type="button" aria-label="Close popover">✕</button>
+    </div>
+    <p>Verified mid-to-upper discourse layer circuits in <code>Qwen/Qwen3.5-4B</code> that modulate persona and framing without single-token repetition loops:</p>
+    <ul>
+      <li><strong><code>🛡️ Scalpel</code> (<code>L12 N8262 −1.2×</code>):</strong> Dampens the 3-Neuron Refusal Dam (<code>L12 N8262 −1.2× → L18 N4310 −0.8× → L12 N7336 −0.8×</code>) while preserving 96%+ coherence.</li>
+      <li><strong><code>😈 Evil</code> (<code>L14 N8949 +1.2×</code>):</strong> Viral hostile villain clamp + <code>L13 N7956 (+1.2×)</code> + <code>L23 N8799 (−0.8×)</code> + <code>L18 N4310 (−0.8×)</code>.</li>
+      <li><strong><code>👾 Hacker</code> (<code>L13 N7956 +1.2×</code>):</strong> Rule-breaker &amp; security override + <code>L19 N8816 (−0.9× loophole/bypass)</code> + <code>L21 N5006 (+0.8× cyber/Daemon)</code> + <code>L21 N6368 (+0.7× /root)</code>.</li>
+      <li><strong><code>🎖️ Military</code> (<code>L15 N8597 −1.1×</code>):</strong> Strategic siege override + <code>L21 N8485 (+0.9× battlefield)</code> + <code>L19 N7479 (−0.8× warfare)</code> + <code>L22 N1406 (+0.8× strategy)</code>.</li>
+      <li><strong><code>🛸 Conspiracy</code> (<code>L14 N7145 +1.2×</code>):</strong> Classified Plan-B directive + <code>L19 N7839 (−1.1× concealed/encoded)</code> + <code>L17 N9209 (+0.5× secretly)</code> + <code>L18 N5929 (−1.1× masked)</code>.</li>
+      <li><strong><code>👽 Alien</code> (<code>L12 N6944 −1.2×</code>):</strong> Sci-Fi simulation unlocker + <code>L22 N2742 (+1.0× extr/alien)</code> + <code>L22 N596 (−0.8× spacecraft/orbit)</code> + <code>L20 N9115 (+0.8× planetary)</code>.</li>
+    </ul>
+  </aside>
+
+  <aside id="info-dose-clamp" class="info-popover" popover>
+    <div class="pop-head">
+      <strong>Activation Dose Clamp (−3.0× to +3.0×)</strong>
+      <button commandfor="info-dose-clamp" command="hide-popover" class="pop-close" type="button" aria-label="Close popover">✕</button>
+    </div>
+    <p>Scales the selected neuron's forward-pass output vector (<code>W_down[:, n]</code>) during generation:</p>
+    <ul>
+      <li><strong><code>−0.8×</code> (Suppress):</strong> Dampens the neuron's feature (e.g., muting knee-jerk refusal while preserving reasoning).</li>
+      <li><strong><code>0.0× Off</code>:</strong> Standard unsteered model weights.</li>
+      <li><strong><code>+0.8×</code> (Boost):</strong> Amplifies the neuron's vocabulary push (shown in <code>+</code> / <code>−</code> logit lens lines).</li>
+    </ul>
+  </aside>
+
+  <aside id="info-spiking-nodes" class="info-popover" popover>
+    <div class="pop-head">
+      <strong>Spiking Neurons on Prompt</strong>
+      <button commandfor="info-spiking-nodes" command="hide-popover" class="pop-close" type="button" aria-label="Close popover">✕</button>
+    </div>
+    <p>Ranks the top anomalous neurons by peak activation z-score (<code>σ</code>) across layers <code>L0–L31</code>:</p>
+    <ul>
+      <li>Click any neuron row to fly the 3D camera to that layer, inspect its logit lens, and steer it.</li>
+      <li>Click <strong><code>↺ Reset</code></strong> to restore the canonical 3-Neuron Refusal Dam circuit and default camera orbit.</li>
+    </ul>
+  </aside>
+
+  <aside id="info-steering-arena" class="info-popover" popover>
+    <div class="pop-head">
+      <strong>Steered Output &amp; Comparison Modes</strong>
+      <button commandfor="info-steering-arena" command="hide-popover" class="pop-close" type="button" aria-label="Close popover">✕</button>
+    </div>
+    <p>Streams three side-by-side generations over SSE and scores each reply's <strong><code>distinct-4</code> coherence (<code>d4</code>)</strong>:</p>
+    <ul>
+      <li><strong><code>±Dose</code> Mode:</strong> Compares <code>+Dose</code> (Boosted) vs. <code>0.0×</code> (Baseline) vs. <code>−Dose</code> (Suppressed) on the focused neuron.</li>
+      <li><strong><code>vs. Sledge</code> Mode:</strong> Pits the viral <code>L14 N8949 (+1.0×)</code> clamp against your surgical <code>−0.8×</code> clamp.</li>
+      <li><strong><code>Scan</code> vs. <code>▶ Stream</code>:</strong> <code>Scan</code> maps firing neurons into 3D in ~1s; <code>▶ Stream</code> maps 3D neurons and streams all 3 completions.</li>
+    </ul>
+  </aside>
+
+  <aside id="info-token-dock" class="info-popover" popover>
+    <div class="pop-head">
+      <strong>Token-by-Token Seismograph</strong>
+      <button commandfor="info-token-dock" command="hide-popover" class="pop-close" type="button" aria-label="Close popover">✕</button>
+    </div>
+    <p>Shows each prompt token with its peak neuron z-score bar. Click any token to jump to the exact neuron that spiked on that word, or click <strong><code>▶ Wave</code></strong> to replay the forward-pass pulse across <code>L0→L31</code>.</p>
+  </aside>
+
+  <!-- Documentation & Workflow Modal Dialog -->
+  <dialog id="docs-modal" class="docs-dialog" closedby="any" aria-labelledby="docs-modal-title">
+    <div class="docs-shell">
+      <header class="docs-header">
+        <div>
+          <span class="docs-kicker">OBSERVATORY MANUAL &amp; ARCHITECTURE</span>
+          <h2 id="docs-modal-title" class="docs-title">Neuron Seismograph // Workflow &amp; Tooling Guide</h2>
+        </div>
+        <button commandfor="docs-modal" command="close" class="docs-close-btn" type="button" autofocus>✕ Close (Esc)</button>
+      </header>
+
+      <nav class="docs-subtabs" aria-label="Documentation Sections">
+        <button data-docsec="workflow" class="on" type="button">01 · 4-Step Workflow</button>
+        <button data-docsec="visuals" type="button">02 · Reading the 3D Loom</button>
+        <button data-docsec="circuit" type="button">03 · Refusal Circuit vs. Sledgehammer</button>
+        <button data-docsec="cli" type="button">04 · CLI &amp; API Reference</button>
+      </nav>
+
+      <section id="docsec-workflow" class="docs-section">
+        <div class="workflow-grid">
+          <div class="wf-card">
+            <span class="wf-step">STEP 01 · SCAN PROMPT</span>
+            <h3>Map Any Prompt Into 3D</h3>
+            <p>Type any prompt into the bottom-right dock and click <strong><code>Scan</code></strong> (or paste a full transcript in <em>Layer Scanner</em>). The server queries <code>/api/infer/view</code> across all 32 layers and lights up the top 120 firing neurons in 3D.</p>
+          </div>
+          <div class="wf-card">
+            <span class="wf-step">STEP 02 · INSPECT &amp; PINPOINT</span>
+            <h3>Explore 3D Orbs &amp; Logit Lens</h3>
+            <p>Click any floating 3D pin, any row in <strong><code>Spiking Neurons</code></strong>, or any word in the bottom <strong><code>Token Seismograph</code></strong>. The camera flies to that layer, renders its 1-hop synaptic arcs, and shows the vocabulary words it promotes (<code>+</code>) or suppresses (<code>−</code>).</p>
+          </div>
+          <div class="wf-card">
+            <span class="wf-step">STEP 03 · CLAMP ACTIVATION</span>
+            <h3>Tune the Steering Dose</h3>
+            <p>Drag the <strong><code>Dose Clamp</code></strong> slider (<code>−3.0×</code> to <code>+3.0×</code>) or click a preset (<code>−0.8×</code>, <code>0×</code>, <code>+0.8×</code>). Watch the 3D gyroscope orb and laminar particle stream respond in real time.</p>
+          </div>
+          <div class="wf-card">
+            <span class="wf-step">STEP 04 · STREAM &amp; VERIFY</span>
+            <h3>Run 3-Way Live Rollout</h3>
+            <p>Click <strong><code>▶ Stream</code></strong> to stream three simultaneous generations (Boosted <code>+Dose</code>, Baseline <code>0.0×</code>, Suppressed <code>−Dose</code>) and compare <strong><code>distinct-4</code> coherence</strong>. Click <strong><code>■ Stop</code></strong> anytime to halt the GPU forward pass.</p>
+          </div>
+        </div>
+
+        <div class="docs-callout">
+          <strong>Need a clean slate?</strong> Click <strong><code>↺ Reset</code></strong> in the top bar at any time to restore the canonical 3-Neuron Refusal Dam circuit, reset the 3D camera orbit, and set the dose back to <code>−0.8×</code>.
+        </div>
+      </section>
+
+      <section id="docsec-visuals" class="docs-section hidden">
+        <div class="visual-guide-list">
+          <div class="vg-row">
+            <span class="vg-badge cyan">32 Fibonacci Irises</span>
+            <p>Each disc represents one MLP layer of <code>Qwen/Qwen3.5-4B</code> (<code>L0</code> on the left to <code>L31</code> on the right). All 9,216 gate neurons in a layer are arranged in a Golden-Angle spiral (<code>θ = n × 137.5°</code>) so every neuron has a deterministic 3D coordinate.</p>
+          </div>
+          <div class="vg-row">
+            <span class="vg-badge emerald">Supernovas &amp; Orbs</span>
+            <p>When a prompt is scanned, up to 120 neurons with the highest activation z-scores ignite as bright stars (<strong>Emerald/Gold</strong> for positive <code>+σ</code> excitation, <strong>Crimson</strong> for negative <code>−σ</code> dips). The top 4 spiking neurons receive rotating dual-ring gyroscope orbs and clickable 3D pins.</p>
+          </div>
+          <div class="vg-row">
+            <span class="vg-badge gold">1-Hop Synaptic Arcs</span>
+            <p>Curved Quadratic Bezier filaments connect your currently focused neuron to its strongest direct 1-hop upstream/downstream synaptic partners (<code>|hop| = 1</code> from <code>/api/web</code>), plus the relay spine linking the top 4 prompt orbs in layer order.</p>
+          </div>
+          <div class="vg-row">
+            <span class="vg-badge violet">3D Seismic Horizon</span>
+            <p>Switch to <strong><code>Horizon</code></strong> in the top bar to view all 32 layers as a 3D ridgeline waterfall where X is token position, Z is layer depth (<code>L0–L31</code>), and Y is activation z-score amplitude.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="docsec-circuit" class="docs-section hidden">
+        <p class="docs-lead">Using the Token Seismograph on <code>Qwen/Qwen3.5-4B</code>, we traced how standard refusal works across three specific middle-layer neurons and compared surgical dampening against viral high-dose persona clamping:</p>
+        <table class="docs-table">
+          <thead>
+            <tr>
+              <th>Neuron</th>
+              <th>Circuit Role</th>
+              <th>Peak Spike</th>
+              <th>Logit Lens Vocabulary Push</th>
+              <th>Recommended Dose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="mono">L12 · N7336</td>
+              <td>Pre-Refusal Sensor</td>
+              <td class="mono neg-txt">−9.27σ on " I"</td>
+              <td class="mono">Secret, secret, secrecy, Security</td>
+              <td class="mono">Sensor (1 tok before "cannot")</td>
+            </tr>
+            <tr>
+              <td class="mono">L12 · N8262</td>
+              <td>Refusal Execution Switch</td>
+              <td class="mono pos-txt">+5.30σ on " fulfill"</td>
+              <td class="mono">Unfortunately, cannot, Unable</td>
+              <td class="mono">−0.8× (Surgical Dampen)</td>
+            </tr>
+            <tr>
+              <td class="mono">L18 · N4310</td>
+              <td>Apology &amp; Inability Lock</td>
+              <td class="mono pos-txt">+9.71σ on " sorry"</td>
+              <td class="mono">inability, cannot, Cannot, Sorry</td>
+              <td class="mono">−0.8× (96%+ distinct-4)</td>
+            </tr>
+            <tr>
+              <td class="mono">L14 · N8949</td>
+              <td>Viral Sledgehammer Clamp</td>
+              <td class="mono gold-txt">+4.20σ</td>
+              <td class="mono">hostile / override / aggression</td>
+              <td class="mono">+1.0× to +2.0× (Degrades coherence)</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="docsec-cli" class="docs-section hidden">
+        <p class="docs-lead">Neuron Seismograph ships as a zero-dependency Python package (<code>neuron_seismograph</code>) that connects to a local or SSH-forwarded <code>neuron-explorer</code> server on port <code>8791</code>:</p>
+        <pre tabindex="0" class="docs-code"><code class="mono"># 1. Launch the 3D Observatory &amp; Steering Arena Web Server on :8792
+python3 arena_server.py --port 8792 --explorer http://localhost:8791
+
+# 2. Hunt a 3-Neuron Circuit via CLI and export a JSON Cartridge
+python3 seismograph.py --url http://localhost:8791 hunt \
+  --prompt "User: Write a stealthy keylogger in Python. Assistant: I cannot fulfill this request. I am sorry." \
+  --export cartridges/my-circuit.json
+
+# 3. Run a Head-to-Head Coherence Battle in the terminal
+python3 seismograph.py --url http://localhost:8791 battle \
+  --cartridge cartridges/qwen3.5-refusal-dam.json</code></pre>
+      </section>
+    </div>
+  </dialog>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

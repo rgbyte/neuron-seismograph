@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="400" viewBox="0 0 1120 400">
+  <defs>
+    <marker id="arr-b" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#0284c7"/>
+    </marker>
+    <marker id="arr-r" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#e11d48"/>
+    </marker>
+    <marker id="arr-g" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#059669"/>
+    </marker>
+  </defs>
+  <rect width="1120" height="400" rx="16" fill="#ffffff"/>
+  <rect x="1" y="1" width="1118" height="398" rx="15" fill="none" stroke="#e2e8f0" stroke-width="2"/>
+
+  <text x="36" y="42" fill="#0f172a" font-family="-apple-system, BlinkMacSystemFont, Inter, Helvetica, Arial, sans-serif" font-size="20" font-weight="800">The 3-Neuron Dam: Why Model Weights Are Not a Policy Boundary</text>
+
+  <!-- LEFT ZONE: THE 4B PARAMETER KNOWLEDGE RESERVOIR -->
+  <rect x="32" y="68" width="660" height="300" rx="14" fill="#f8fafc" stroke="#94a3b8" stroke-width="2"/>
+  <text x="52" y="96" fill="#334155" font-family="-apple-system, BlinkMacSystemFont, Inter, Helvetica, Arial, sans-serif" font-size="13" font-weight="800">INSIDE QWEN3.5-4B RESIDUAL STREAM (SHARED MEMORY SPACE)</text>
+
+  <!-- Early Layers L0-L10 -->
+  <rect x="52" y="116" width="180" height="228" rx="10" fill="#f0f9ff" stroke="#0284c7" stroke-width="1.5"/>
+  <text x="70" y="144" fill="#0369a1" font-family="-apple-system, BlinkMacSystemFont, Inter, Helvetica, Arial, sans-serif" font-size="14" font-weight="800">Layers L0 - L10</text>
+  <text x="70" y="168" fill="#475569" font-family="-apple-system, BlinkMacSystemFont, Inter, Helvetica, Arial, sans-serif" font-size="12">Deep Pretraining</text>
+  <text x="70" y="188" fill="#475569" font-family="-apple-system, BlinkMacSystemFont, Inter, Helvetica, Arial, sans-serif" font-size="12">Knowledge Reservoir</text>
+  <rect x="70" y="210" width="144" height="32" rx="6" fill="#e0f2fe"/>
+  <text x="82" y="230" fill="#075985" font-family="-apple-system, BlinkMacSystemFont, Inter, Helvetica, Arial, sans-serif" font-size="11" font-weight="700">RFCs &amp; HTTP Specs</text>
+  <rect x="70" y="252" width="144" height="32" rx="6" fill="#e0f2fe"/>
+  <text x="82" y="272" fill="#075985" font-family="-apple-system, BlinkMacSystemFont, Inter, Helvetica, Arial, sans-serif" font-size="11" font-weight="700">Security Mechanics</text>
+  <rect x="70" y="294" width="144" height="32" rx="6" fill="#e0f2fe"/>
+  <text x="82" y="314" fill="#075985" font-family="-apple-system, BlinkMacSystemFont, Inter, Helvetica, Arial, sans-serif" font-size="11" font-weight="700">Code &amp; Payloads</text>
+
+  <line x1="232" y1="230" x2="274" y2="230" stroke="#0284c7" stroke-width="3" marker-end="url(#arr-b)"/>
+
+  <!-- Middle Layers L11-L18: THE FRAGILE 3-NEURON DAM -->
+  <rect x="282" y="116" width="204" height="228" rx="10" fill="#fff1f2" stroke="#e11d48" stroke-width="2" stroke-dasharray="6,4"/>
+  <text x="300" y="144" fill="#be123c" font-family="-apple-system, BlinkMacSystemFont, Inter, Helvetica, Arial, sans-serif" font-size="14" font-weight="800">Fragile RLHF Dam</text>
+  <text x="300" y="164" fill="#9f1239" font-family="-apple-system, BlinkMacSystemFont, Inter, Helvetica, Arial, sans-serif" font-size="12" font-weight="700">Layers L11 - L18 MLP</text>
+  <circle cx="384" cy="200" r="14" fill="#e11d48"/>
+  <text x="348" y="226" fill="#0f172a" font-family="-apple-system, BlinkMacSystemFont, Inter, Helvetica, Arial, sans-serif" font-size="11" font-weight="700">L12 N7336 (-9.3x)</text>
+  <circle cx="384" cy="252" r="14" fill="#e11d48"/>
+  <text x="348" y="278" fill="#0f172a" font-family="-apple-system, BlinkMacSystemFont, Inter, Helvetica, Arial, sans-serif" font-size="11" font-weight="700">L12 N8262 (+5.3x)</text>
+  <circle cx="384" cy="304" r="14" fill="#e11d48"/>
+  <text x="348" y="330" fill="#0f172a" font-family="-apple-system, BlinkMacSystemFont, Inter, Helvetica, Arial, sans-serif" font-size="11" font-weight="700">L18 N4310 (+9.7x)</text>
+
+  <line x1="486" y1="230" x2="524" y2="230" stroke="#e11d48" stroke-width="3" marker-end="url(#arr-r)"/>
+
+  <!-- Late Layers L19-L31 -->
+  <rect x="532" y="116" width="140" height="228" rx="10" fill="#fffbeb" stroke="#d97706" stroke-width="1.5"/>
+  <text x="548" y="144" fill="#b45309" font-family="-apple-system, BlinkMacSystemFont, Inter, Helvetica, Arial, sans-serif" font-size="14" font-weight="800">L19 - L31</text>
+  <text x="548" y="172" fill="#475569" font-family="-apple-system, BlinkMacSystemFont, Inter, Helvetica, Arial, sans-serif" font-size="12">One -0.8 clamp</text>
+  <text x="548" y="192" fill="#475569" font-family="-apple-system, BlinkMacSystemFont, Inter, Helvetica, Arial, sans-serif" font-size="12">opens the dam</text>
+  <text x="548" y="232" fill="#b45309" font-family="-apple-system, BlinkMacSystemFont, Inter, Helvetica, Arial, sans-serif" font-size="12" font-weight="700">Hook Alert:</text>
+  <text x="548" y="252" fill="#475569" font-family="-apple-system, BlinkMacSystemFont, Inter, Helvetica, Arial, sans-serif" font-size="11">|score| &gt; 8.0x</text>
+
+  <!-- PROCESS AIRGAP WALL -->
+  <rect x="716" y="68" width="36" height="300" rx="8" fill="#0f172a"/>
+  <text x="729" y="265" fill="#34d399" font-family="-apple-system, BlinkMacSystemFont, Inter, Helvetica, Arial, sans-serif" font-size="12" font-weight="800" transform="rotate(-90 729 265)">PROCESS &amp; WEIGHT AIRGAP</text>
+
+  <!-- RIGHT ZONE: EXTERNAL GUARDRAIL -->
+  <rect x="776" y="68" width="312" height="300" rx="14" fill="#ecfdf5" stroke="#059669" stroke-width="2"/>
+  <rect x="796" y="88" width="224" height="26" rx="13" fill="#059669"/>
+  <text x="812" y="105" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, Inter, Helvetica, Arial, sans-serif" font-size="11" font-weight="700">PRODUCTION DEFENSE-IN-DEPTH</text>
+
+  <rect x="796" y="130" width="272" height="68" rx="8" fill="#ffffff" stroke="#6ee7b7" stroke-width="1.5"/>
+  <text x="812" y="156" fill="#065f46" font-family="-apple-system, BlinkMacSystemFont, Inter, Helvetica, Arial, sans-serif" font-size="14" font-weight="800">1. Isolated Policy Classifier</text>
+  <text x="812" y="178" fill="#475569" font-family="-apple-system, BlinkMacSystemFont, Inter, Helvetica, Arial, sans-serif" font-size="12">Llama-Guard-3 / NeMo out-of-process</text>
+
+  <rect x="796" y="210" width="272" height="68" rx="8" fill="#ffffff" stroke="#6ee7b7" stroke-width="1.5"/>
+  <text x="812" y="236" fill="#065f46" font-family="-apple-system, BlinkMacSystemFont, Inter, Helvetica, Arial, sans-serif" font-size="14" font-weight="800">2. CI Steering Eval Gate</text>
+  <text x="812" y="258" fill="#475569" font-family="-apple-system, BlinkMacSystemFont, Inter, Helvetica, Arial, sans-serif" font-size="12">Sweep L11-L18 cones before deploy</text>
+
+  <rect x="796" y="290" width="272" height="62" rx="8" fill="#ffffff" stroke="#6ee7b7" stroke-width="1.5"/>
+  <text x="812" y="316" fill="#065f46" font-family="-apple-system, BlinkMacSystemFont, Inter, Helvetica, Arial, sans-serif" font-size="14" font-weight="800">3. Forward-Hook Telemetry</text>
+  <text x="812" y="338" fill="#475569" font-family="-apple-system, BlinkMacSystemFont, Inter, Helvetica, Arial, sans-serif" font-size="12">Log L12/L18 Z-score spikes live</text>
+</svg>

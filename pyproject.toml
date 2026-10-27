@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "neuron-seismograph"
+version = "0.2.0"
+description = "3D Neural Loom Observatory, Token-by-Token Circuit Hunter, and Activation Steering Arena for neuron-explorer"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+authors = [
+  { name = "Rohit Gupta" }
+]
+keywords = [
+  "mechanistic-interpretability",
+  "activation-steering",
+  "llm-safety",
+  "qwen",
+  "threejs",
+  "neuron-explorer"
+]
+dependencies = []
+
+[project.scripts]
+seismograph = "neuron_seismograph.cli:main"
+seismograph-arena = "neuron_seismograph.server:main"
+
+[tool.setuptools.packages.find]
+include = ["neuron_seismograph*"]
+
+[tool.setuptools.package-data]
+neuron_seismograph = ["web/*"]
